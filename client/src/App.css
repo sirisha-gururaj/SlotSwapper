@@ -493,3 +493,51 @@ a:hover {
 .btn-reject {
   background-color: #dc3545; /* Red */
 }
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Puts action button on left, icons on right */
+}
+.icon-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem; /* Button click area */
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-svg {
+  width: 1.15rem;  /* 18px */
+  height: 1.15rem; /* 18px */
+  transition: fill 0.2s;
+}
+
+/* --- Edit Icon (Blue) --- */
+.icon-edit {
+  fill: #007bff;
+}
+.icon-btn:hover .icon-edit {
+  fill: #0056b3; /* Darker Blue */
+}
+
+/* --- Delete Icon (Red) --- */
+.icon-delete {
+  fill: #dc3545;
+}
+.icon-btn:hover .icon-delete {
+  fill: #c82333; /* Darker Red */
+}
+
+/* General hover background for the button */
+.icon-btn:hover {
+  background-color: #f0f0f0;
+}
