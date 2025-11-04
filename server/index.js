@@ -7,6 +7,9 @@ const cors = require('cors');
 // This line also runs the file, which will create our tables.
 const db = require('./database.js');
 
+// Import the auth routes
+const authRoutes = require('./routes/auth.js');
+
 // Create an Express application
 const app = express();
 
@@ -18,6 +21,8 @@ app.use(express.json());
 // Define the port to run on
 const PORT = 4000; // You can change this, but 4000 is a good choice
 
+// Tell Express to use the auth routes for any /api/auth URL
+app.use('/api/auth', authRoutes);
 // A simple "test" route to make sure our server is alive
 app.get('/', (req, res) => {
   res.json({ message: "Hello from the SlotSwapper API!" });
