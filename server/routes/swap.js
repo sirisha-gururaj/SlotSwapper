@@ -179,5 +179,88 @@ router.post('/response/:requestId', async (req, res) => {
   }
 });
 
+// ===========================================
+//  4. GET MY INCOMING SWAP REQUESTS
+//  Endpoint: GET /api/swap/requests/incoming
+// ===========================================
+router.get('/requests/incoming', async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+
+    // This query is complex:
+    // 1. Find all PENDING SwapRequests.
+    // 2. Join Events table to get the 'receiverSlot' info.
+    // 3. Check if the 'receiverSlot' (the one I own) belongs to me.
+    // 4. Join Events and Users tables again to get the *requester's* slot info and name.
+    const sql = `
+      SELECT 
+        SR.id as swapRequestId,
+        ReqSlot.id as requesterSlotId,
+        ReqSlot.title as requesterSlotTitle,
+        ReqSlot.startTime as requesterSlotStartTime,
+        ReqUser.name as requesterName
+      FROM SwapRequests SR
+      JOIN Events RecSlot ON SR.receiverSlotId = RecSlot.id
+      JOIN Events ReqSlot ON SR.requesterSlotId = ReqSlot.id
+      JOIN Users ReqUser ON ReqSlot.userId = ReqUser.id
+      WHERE 
+        RecSlot.userId = ? AND SR.status = 'PENDING'
+    `;
+
+    const requests = await new Promise((resolve, reject) => {
+      db.all(sql, [currentUserId], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+
+    res.status(200).json(requests);
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error fetching incoming requests." });
+  }
+});
+
+// ===========================================
+//  5. GET MY OUTGOING SWAP REQUESTS
+//  Endpoint: GET /api/swap/requests/outgoing
+// ===========================================
+router.get('/requests/outgoing', async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+
+    // This query is the reverse:
+    // 1. Find all PENDING SwapRequests.
+    // 2. Join Events table to get the 'requesterSlot' info.
+    // 3. Check if the 'requesterSlot' (the one I offered) belongs to me.
+    // 4. Join Events and Users tables again to get the *receiver's* slot info and name.
+    const sql = `
+      SELECT 
+        SR.id as swapRequestId,
+        RecSlot.id as receiverSlotId,
+        RecSlot.title as receiverSlotTitle,
+        RecSlot.startTime as receiverSlotStartTime,
+        RecUser.name as receiverName
+      FROM SwapRequests SR
+      JOIN Events ReqSlot ON SR.requesterSlotId = ReqSlot.id
+      JOIN Events RecSlot ON SR.receiverSlotId = RecSlot.id
+      JOIN Users RecUser ON RecSlot.userId = RecUser.id
+      WHERE 
+        ReqSlot.userId = ? AND SR.status = 'PENDING'
+    `;
+
+    const requests = await new Promise((resolve, reject) => {
+      db.all(sql, [currentUserId], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+
+    res.status(200).json(requests);
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error fetching outgoing requests." });
+  }
+});
 
 module.exports = router;

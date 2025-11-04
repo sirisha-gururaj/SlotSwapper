@@ -253,3 +253,160 @@ a:hover {
   border-radius: 4px;
   text-align: center;
 }
+
+.marketplace-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.marketplace-list th, .marketplace-list td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.marketplace-list th {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* Success Message */
+.success-message {
+  color: #05603a;
+  background-color: #d1fadf;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+  z-index: 1001;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content p {
+  line-height: 1.6;
+}
+
+.modal-content select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Shared button styles */
+.btn-primary {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-actions .btn-secondary {
+  background-color: #e0e0e0;
+  border: none;
+} 
+
+.requests-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.requests-column h3 {
+  margin-top: 0;
+}
+
+.requests-column p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.requests-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.requests-list th, .requests-list td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.requests-list th {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.requests-list td {
+  font-size: 0.95rem;
+}
+
+.requests-list .action-btn {
+  margin-right: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.btn-accept {
+  background-color: #28a745; /* Green */
+}
+.btn-accept:hover {
+  background-color: #218838;
+}
+
+.btn-reject {
+  background-color: #dc3545; /* Red */
+}
+.btn-reject:hover {
+  background-color: #c82333;
+}
