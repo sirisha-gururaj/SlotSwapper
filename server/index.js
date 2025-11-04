@@ -9,6 +9,8 @@ const db = require('./database.js');
 
 // Import the auth routes
 const authRoutes = require('./routes/auth.js');
+const eventRoutes = require('./routes/events.js');
+const swapRoutes = require('./routes/swap.js');
 
 // Create an Express application
 const app = express();
@@ -23,6 +25,9 @@ const PORT = 4000; // You can change this, but 4000 is a good choice
 
 // Tell Express to use the auth routes for any /api/auth URL
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/swap', swapRoutes);
+
 // A simple "test" route to make sure our server is alive
 app.get('/', (req, res) => {
   res.json({ message: "Hello from the SlotSwapper API!" });
