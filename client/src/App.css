@@ -81,3 +81,175 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 60px;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.logout-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #d93025;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-container {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* 1/3 for form, 2/3 for list */
+  gap: 2rem;
+}
+
+.event-form {
+  background: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.event-form h3, .event-list h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.event-form div {
+  margin-bottom: 1rem;
+}
+
+.event-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.event-form input {
+  width: 100%;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.event-form button {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.event-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.event-list th, .event-list td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.event-list th {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-busy {
+  background-color: #fef0c7;
+  color: #945800;
+}
+
+.status-swappable {
+  background-color: #d1fadf;
+  color: #05603a;
+}
+
+.status-swap_pending {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.action-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-btn-secondary {
+  background-color: #6c757d;
+}
+
+.action-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error message class */
+.error {
+  color: #d93025;
+  background-color: #fbeae9;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
