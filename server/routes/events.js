@@ -124,4 +124,98 @@ router.patch('/:eventId/status', authMiddleware, async (req, res) => {
   }
 });
 
+// ===========================================
+//  4. UPDATE A FULL EVENT (Title, Time)
+//  Endpoint: PUT /api/events/:eventId
+//  This route is PROTECTED
+// ===========================================
+router.put('/:eventId', authMiddleware, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { title, startTime, endTime } = req.body;
+    const userId = req.user.id;
+
+    if (!title || !startTime || !endTime) {
+      return res.status(400).json({ error: "Title, startTime, and endTime are required." });
+    }
+
+    // 1. Find the event
+    const event = await new Promise((r) => db.get("SELECT * FROM Events WHERE id = ?", [eventId], (_, row) => r(row)));
+
+    // 2. Check if event exists
+    if (!event) {
+      return res.status(404).json({ error: "Event not found." });
+    }
+
+    // 3. Check if this user *owns* the event
+    if (event.userId !== userId) {
+      return res.status(403).json({ error: "Forbidden. You do not own this event." });
+    }
+
+    // 4. Check that the event is not in a pending swap
+    if (event.status === 'SWAP_PENDING') {
+      return res.status(400).json({ error: "Cannot edit an event that is in a pending swap." });
+    }
+
+    // 5. Update the event
+    const sql = `
+      UPDATE Events 
+      SET title = ?, startTime = ?, endTime = ? 
+      WHERE id = ? AND userId = ?
+    `;
+    db.run(sql, [title, startTime, endTime, eventId, userId], function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.status(200).json({ message: "Event updated successfully." });
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error updating event." });
+  }
+});
+
+// ===========================================
+//  5. DELETE AN EVENT
+//  Endpoint: DELETE /api/events/:eventId
+//  This route is PROTECTED
+// ===========================================
+router.delete('/:eventId', authMiddleware, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const userId = req.user.id;
+
+    // 1. Find the event
+    const event = await new Promise((r) => db.get("SELECT * FROM Events WHERE id = ?", [eventId], (_, row) => r(row)));
+
+    // 2. Check if event exists
+    if (!event) {
+      return res.status(404).json({ error: "Event not found." });
+    }
+
+    // 3. Check if this user *owns* the event
+    if (event.userId !== userId) {
+      return res.status(403).json({ error: "Forbidden. You do not own this event." });
+    }
+
+    // 4. Check that the event is not in a pending swap
+    if (event.status === 'SWAP_PENDING') {
+      return res.status(400).json({ error: "Cannot delete an event that is in a pending swap." });
+    }
+
+    // 5. Delete the event
+    // (We should also delete any related swap requests, but for this
+    // challenge, just deleting the event is fine if it's not pending)
+    db.run("DELETE FROM Events WHERE id = ? AND userId = ?", [eventId, userId], function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.status(200).json({ message: "Event deleted successfully." });
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error deleting event." });
+  }
+});
+
 module.exports = router;

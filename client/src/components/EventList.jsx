@@ -14,6 +14,20 @@ function EventList({ events, onEventUpdated }) {
       console.error("Error updating status:", err);
     }
   };
+  const handleDelete = async (eventId) => {
+    // Ask for confirmation
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      try {
+        await api.delete(`/events/${eventId}`);
+        // Tell the parent to refetch
+        onEventUpdated();
+      } catch (err) {
+        console.error("Error deleting event:", err);
+        // You could show an error to the user here
+        alert("Error deleting event. It might be in a pending swap.");
+      }
+    }
+  };
 
   return (
     <div className="event-list">
@@ -29,6 +43,7 @@ function EventList({ events, onEventUpdated }) {
               <th>End Time</th>
               <th>Status</th>
               <th>Action</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -64,6 +79,16 @@ function EventList({ events, onEventUpdated }) {
                   {event.status === 'SWAP_PENDING' && (
                     <button className="action-btn" disabled>
                       Pending...
+                    </button>
+                  )}
+                </td>
+                <td>
+                  {event.status !== 'SWAP_PENDING' && (
+                    <button 
+                      className="action-btn btn-delete"
+                      onClick={() => handleDelete(event.id)}
+                    >
+                      Delete
                     </button>
                   )}
                 </td>

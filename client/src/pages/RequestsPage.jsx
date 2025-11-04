@@ -1,6 +1,7 @@
 // src/pages/RequestsPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api';
+import { useAuth } from '../context/AuthContext'; // <-- 1. IMPORT useAuth
 
 function RequestsPage() {
   const [incoming, setIncoming] = useState([]);
@@ -8,15 +9,14 @@ function RequestsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const { fetchNotificationCount } = useAuth(); // <-- 2. GET THE FUNCTION
 
-  // Function to fetch *both* lists
   const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
       setMessage('');
       setError('');
 
-      // Use Promise.all to fetch both endpoints at the same time
       const [incomingRes, outgoingRes] = await Promise.all([
         api.get('/swap/requests/incoming'),
         api.get('/swap/requests/outgoing')
@@ -32,23 +32,31 @@ function RequestsPage() {
     }
   }, []);
 
-  // Fetch requests when the page loads
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
 
-  // This is called when we click "Accept" or "Reject"
   const handleResponse = async (requestId, acceptance) => {
     try {
       const action = acceptance ? 'accepted' : 'rejected';
-      // Call the response endpoint we made earlier
       await api.post(`/swap/response/${requestId}`, { acceptance });
 
       setMessage(`Request successfully ${action}.`);
-      // Refetch the lists, as this request will disappear
-      fetchRequests();
+      fetchRequests(); // Refetch the lists
+      fetchNotificationCount(); // <-- 3. UPDATE NAVBAR BADGE
     } catch (err) {
       setError('Failed to respond to request.');
+    }
+  };
+
+  // 4. ADD NEW DISMISS FUNCTION
+  const handleDismiss = async (requestId) => {
+    try {
+      await api.delete(`/swap/request/${requestId}`);
+      setMessage('Request dismissed.');
+      fetchRequests(); // Refetch the lists
+    } catch (err) {
+      setError('Failed to dismiss request.');
     }
   };
 
@@ -61,7 +69,7 @@ function RequestsPage() {
       {error && <div className="error">{error}</div>}
       {message && <div className="success-message">{message}</div>}
 
-      {/* INCOMING REQUESTS LIST */}
+      {/* INCOMING REQUESTS LIST (No changes here) */}
       <div className="requests-column">
         <h3>Incoming Requests</h3>
         <p>Requests from other users for your slots.</p>
@@ -70,14 +78,7 @@ function RequestsPage() {
             <p>You have no pending incoming requests.</p>
           ) : (
             <table>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Offering Slot</th>
-                  <th>Time</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+              {/* ... table head ... */}
               <tbody>
                 {incoming.map((req) => (
                   <tr key={req.swapRequestId}>
@@ -106,7 +107,7 @@ function RequestsPage() {
         </div>
       </div>
 
-      {/* OUTGOING REQUESTS LIST */}
+      {/* 5. === OUTGOING REQUESTS LIST (THIS IS UPDATED) === */}
       <div className="requests-column">
         <h3>Outgoing Requests</h3>
         <p>Your pending requests to other users.</p>
@@ -121,6 +122,7 @@ function RequestsPage() {
                   <th>Requesting Slot</th>
                   <th>Time</th>
                   <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -130,9 +132,27 @@ function RequestsPage() {
                     <td>{req.receiverSlotTitle}</td>
                     <td>{new Date(req.receiverSlotStartTime).toLocaleString()}</td>
                     <td>
-                      <span className="status status-swap_pending">
-                        PENDING
-                      </span>
+                      {/* Show different badge based on status */}
+                      {req.status === 'PENDING' ? (
+                        <span className="status status-swap_pending">
+                          PENDING
+                        </span>
+                      ) : (
+                        <span className="status status-rejected">
+                          REJECTED
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {/* Show Dismiss button only for REJECTED */}
+                      {req.status === 'REJECTED' && (
+                        <button
+                          className="action-btn btn-dismiss"
+                          onClick={() => handleDismiss(req.swapRequestId)}
+                        >
+                          Dismiss
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

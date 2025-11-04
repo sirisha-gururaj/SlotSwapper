@@ -3,8 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api';
 import EventForm from '../components/EventForm';
 import EventList from '../components/EventList';
+import { useAuth } from '../context/AuthContext';
 
 function DashboardPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,15 +41,18 @@ function DashboardPage() {
   }
 
   return (
-    <div className="page-container dashboard-layout">
-      <div className="dashboard-column">
-        {/* We pass the 'fetchEvents' function as a prop.
-          When the form successfully creates an event, it will call this function.
-        */}
-        <EventForm onEventCreated={fetchEvents} />
+    <div className="page-container">
+      <div className="dashboard-header">
+        <h2>Welcome, {user?.name}!</h2>
+        <p>Manage your events and make them available for swapping.</p>
       </div>
-      <div className="dashboard-column">
-        <EventList events={events} onEventUpdated={fetchEvents} />
+      <div className="dashboard-layout">
+        <div className="dashboard-column">
+          <EventForm onEventCreated={fetchEvents} />
+        </div>
+        <div className="dashboard-column">
+          <EventList events={events} onEventUpdated={fetchEvents} />
+        </div>
       </div>
     </div>
   );

@@ -235,19 +235,20 @@ router.get('/requests/outgoing', async (req, res) => {
     // 3. Check if the 'requesterSlot' (the one I offered) belongs to me.
     // 4. Join Events and Users tables again to get the *receiver's* slot info and name.
     const sql = `
-      SELECT 
-        SR.id as swapRequestId,
-        RecSlot.id as receiverSlotId,
-        RecSlot.title as receiverSlotTitle,
-        RecSlot.startTime as receiverSlotStartTime,
-        RecUser.name as receiverName
-      FROM SwapRequests SR
-      JOIN Events ReqSlot ON SR.requesterSlotId = ReqSlot.id
-      JOIN Events RecSlot ON SR.receiverSlotId = RecSlot.id
-      JOIN Users RecUser ON RecSlot.userId = RecUser.id
-      WHERE 
-        ReqSlot.userId = ? AND SR.status = 'PENDING'
-    `;
+  SELECT 
+    SR.id as swapRequestId,
+    SR.status, 
+    RecSlot.id as receiverSlotId,
+    RecSlot.title as receiverSlotTitle,
+    RecSlot.startTime as receiverSlotStartTime,
+    RecUser.name as receiverName
+  FROM SwapRequests SR
+  JOIN Events ReqSlot ON SR.requesterSlotId = ReqSlot.id
+  JOIN Events RecSlot ON SR.receiverSlotId = RecSlot.id
+  JOIN Users RecUser ON RecSlot.userId = RecUser.id
+  WHERE 
+    ReqSlot.userId = ? AND (SR.status = 'PENDING' OR SR.status = 'REJECTED')
+`;
 
     const requests = await new Promise((resolve, reject) => {
       db.all(sql, [currentUserId], (err, rows) => {
@@ -260,6 +261,37 @@ router.get('/requests/outgoing', async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: "Server error fetching outgoing requests." });
+  }
+});
+
+// ===========================================
+//  6. DISMISS A REJECTED/ACCEPTED REQUEST (Deletes it)
+//  Endpoint: DELETE /api/swap/request/:requestId
+// ===========================================
+router.delete('/request/:requestId', async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const currentUserId = req.user.id;
+
+    // We need to make sure the user owns one of the slots
+    const swapReq = await new Promise((r) => db.get("SELECT * FROM SwapRequests WHERE id = ?", [requestId], (_, row) => r(row)));
+    const requesterSlot = await new Promise((r) => db.get("SELECT * FROM Events WHERE id = ?", [swapReq.requesterSlotId], (_, row) => r(row)));
+
+    // Only the original requester can dismiss their own outgoing requests
+    if (requesterSlot.userId !== currentUserId) {
+      return res.status(403).json({ error: "Forbidden. You cannot dismiss this request." });
+    }
+
+    // Delete the request
+    db.run("DELETE FROM SwapRequests WHERE id = ?", [requestId], function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.status(200).json({ message: "Request dismissed." });
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error dismissing request." });
   }
 });
 

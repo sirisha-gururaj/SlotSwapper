@@ -410,3 +410,86 @@ a:hover {
 .btn-reject:hover {
   background-color: #c82333;
 }
+
+.nav-link {
+  padding: 0.5rem 0;
+  position: relative;
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  color: #007bff;
+  text-decoration: none;
+}
+
+/* Style for the ACTIVE nav link */
+.nav-link.active {
+  color: #007bff;
+  font-weight: 700;
+}
+
+/* Underline effect for the active link */
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #007bff;
+  border-radius: 2px;
+}
+.notification-badge {
+  background-color: #dc3545; /* Red */
+  color: white;
+  border-radius: 50%;
+  padding: 2px 7px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-left: 8px;
+  vertical-align: top;
+}
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+}
+
+.dashboard-header p {
+  margin: 0.5rem 0 0;
+  color: #666;
+}
+.status-rejected {
+  background-color: #fbeae9; /* Light Red */
+  color: #c82333; /* Dark Red */
+}
+
+.btn-dismiss {
+  background-color: #6c757d; /* Gray */
+}
+.btn-dismiss:hover {
+  background-color: #5a6268;
+}
+
+/* Ensure table cells with no button don't look broken */
+.requests-list td:last-child {
+  min-width: 90px;
+}
+.btn-delete {
+  background-color: #dc3545; /* Red */
+  opacity: 0.7;
+}
+.btn-delete:hover {
+  background-color: #c82333;
+  opacity: 1;
+}
+
+/* Match the reject button style */
+.btn-reject {
+  background-color: #dc3545; /* Red */
+}
