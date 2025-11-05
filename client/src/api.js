@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an axios instance with a base URL
 const api = axios.create({
-  baseURL: 'https://slotswapper-server.onrender.com'
+  baseURL: 'https://slotswapper-server.onrender.com/api'
 });
 
 // This is an "interceptor"
