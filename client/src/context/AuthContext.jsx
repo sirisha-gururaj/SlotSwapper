@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import api from '../api';
 
 const AuthContext = createContext();
@@ -7,18 +7,18 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  // --- ADD THIS NEW STATE ---
   const [notificationCount, setNotificationCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // --- ADD THIS NEW FUNCTION ---
-  // It fetches the number of incoming requests
+  // --- 1. ADD A REF TO HOLD THE WEBSOCKET ---
+  // A 'ref' won't change on re-renders and won't trigger them
+  const ws = useRef(null);
+
   const fetchNotificationCount = useCallback(async () => {
     try {
       const response = await api.get('/swap/requests/incoming');
       setNotificationCount(response.data.length);
     } catch (error) {
-      // Don't show an error, just set to 0
       setNotificationCount(0);
     }
   }, []);
@@ -27,24 +27,67 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       if (token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        // --- CALL THE NEW FUNCTION ON LOAD ---
         await fetchNotificationCount();
-        
-        // A simple way to get user data without another API call
-        // We decode the token (this is safe on the client)
+
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
           setUser(payload.user);
         } catch (e) {
           console.error("Invalid token:", e);
-          // Handle invalid token if necessary (e.g., logout)
         }
+
+        // --- 2. ESTABLISH WEBSOCKET CONNECTION ---
+        // Use 'ws:' (not wss:) for local development
+        ws.current = new WebSocket('ws://localhost:4000');
+
+        // 2a. On Open: Authenticate
+        ws.current.onopen = () => {
+          console.log('WebSocket: Connection opened.');
+          // Send the auth token
+          ws.current.send(JSON.stringify({ type: 'AUTH', token: token }));
+        };
+
+        // 2b. On Message: Listen for notifications
+        ws.current.onmessage = (event) => {
+              try {
+                const message = JSON.parse(event.data);
+                
+                if (message.type === 'NEW_REQUEST' || message.type === 'REQUEST_RESPONSE') {
+                  // 1. Update the badge
+                  fetchNotificationCount();
+                  
+                  // 2. Dispatch a global event that our pages can listen to
+                  window.dispatchEvent(new Event('refetchData'));
+                }
+              } catch (e) {
+            console.error('WebSocket: Error parsing message', e);
+          }
+        };
+
+        // 2c. On Close: Handle closure
+        ws.current.onclose = () => {
+          console.log('WebSocket: Connection closed.');
+        };
+
+        // 2d. On Error: Handle errors
+        ws.current.onerror = (error) => {
+          console.error('WebSocket: Error:', error);
+        };
 
       }
       setLoading(false);
     };
     initializeAuth();
-  }, [token, fetchNotificationCount]);
+
+    // --- 3. CLEANUP FUNCTION ---
+    // This runs when the component unmounts or token changes
+    return () => {
+      if (ws.current) {
+        ws.current.close(); // Close the connection
+        ws.current = null;
+      }
+    };
+  }, [token, fetchNotificationCount]); // Run this effect when 'token' changes
 
   const register = async (name, email, password) => {
     await api.post('/auth/register', { name, email, password });
@@ -53,16 +96,22 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     const { token, user } = response.data;
+    // Setting the token will trigger the useEffect above
     setToken(token);
     setUser(user);
     localStorage.setItem('token', token);
   };
 
   const logout = () => {
+    // --- 4. CLOSE WEBSOCKET ON LOGOUT ---
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
+
     setUser(null);
     setToken(null);
-    // --- RESET COUNT ON LOGOUT ---
-    setNotificationCount(0); 
+    setNotificationCount(0);
     localStorage.removeItem('token');
   };
 
@@ -71,7 +120,6 @@ export const AuthProvider = ({ children }) => {
     token,
     isAuthenticated: !!token,
     loading,
-    // --- EXPORT THE COUNT AND FUNCTION ---
     notificationCount,
     fetchNotificationCount,
     register,

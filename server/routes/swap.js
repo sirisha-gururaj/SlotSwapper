@@ -96,7 +96,9 @@ router.post('/request', async (req, res) => {
             // This is tricky, we'd ideally roll back. But for now, send error.
             return res.status(500).json({ error: "Failed to lock slots." });
           }
-          
+          const sendNotification = req.app.get('sendNotification');
+          const receiverUserId = theirSlot.userId;
+          sendNotification(receiverUserId, { type: 'NEW_REQUEST' });
           res.status(201).json({
             message: "Swap request submitted successfully!",
             swapRequestId: swapRequestId,
@@ -148,27 +150,29 @@ router.post('/response/:requestId', async (req, res) => {
     db.serialize(() => {
       if (acceptance === false) {
         // --- 2a. Handle REJECTION ---
-        
-        // 1. Update SwapRequest to REJECTED
         db.run("UPDATE SwapRequests SET status = 'REJECTED' WHERE id = ?", [requestId]);
-        
-        // 2. Unlock both slots, set them back to SWAPPABLE
         db.run("UPDATE Events SET status = 'SWAPPABLE' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
-        
+
+        // --- ADD THESE LINES ---
+        const sendNotification = req.app.get('sendNotification');
+        const requesterUserId = requesterSlot.userId;
+        sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'REJECTED' });
+        // --- END OF ADDED LINES ---
+
         res.status(200).json({ message: "Swap request rejected." });
 
       } else {
         // --- 2b. Handle ACCEPTANCE (The core logic) ---
-        
-        // 1. Update SwapRequest to ACCEPTED
         db.run("UPDATE SwapRequests SET status = 'ACCEPTED' WHERE id = ?", [requestId]);
-
-        // 2. SWAP the owners (userId) of the two events
         db.run("UPDATE Events SET userId = ? WHERE id = ?", [requesterSlot.userId, receiverSlot.id]);
         db.run("UPDATE Events SET userId = ? WHERE id = ?", [receiverSlot.userId, requesterSlot.id]);
-
-        // 3. Set both events' status back to 'BUSY'
         db.run("UPDATE Events SET status = 'BUSY' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
+
+        // --- ADD THESE LINES ---
+        const sendNotification = req.app.get('sendNotification');
+        const requesterUserId = requesterSlot.userId;
+        sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'ACCEPTED' });
+        // --- END OF ADDED LINES ---
 
         res.status(200).json({ message: "Swap accepted! Your calendars have been updated." });
       }
@@ -247,7 +251,7 @@ router.get('/requests/outgoing', async (req, res) => {
   JOIN Events RecSlot ON SR.receiverSlotId = RecSlot.id
   JOIN Users RecUser ON RecSlot.userId = RecUser.id
   WHERE 
-    ReqSlot.userId = ? AND (SR.status = 'PENDING' OR SR.status = 'REJECTED')
+    ReqSlot.userId = ? AND (SR.status = 'PENDING' OR SR.status = 'REJECTED' OR SR.status = 'ACCEPTED')
 `;
 
     const requests = await new Promise((resolve, reject) => {

@@ -36,6 +36,21 @@ function RequestsPage() {
     fetchRequests();
   }, [fetchRequests]);
 
+  useEffect(() => {
+    const handleDataRefetch = () => {
+      console.log('Real-time: refetchData event received. Refetching requests.');
+      fetchRequests();
+    };
+    
+    // Listen for the global event
+    window.addEventListener('refetchData', handleDataRefetch);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('refetchData', handleDataRefetch);
+    };
+  }, [fetchRequests]);
+
   const handleResponse = async (requestId, acceptance) => {
     try {
       const action = acceptance ? 'accepted' : 'rejected';
@@ -132,28 +147,26 @@ function RequestsPage() {
                     <td>{req.receiverSlotTitle}</td>
                     <td>{new Date(req.receiverSlotStartTime).toLocaleString()}</td>
                     <td>
-                      {/* Show different badge based on status */}
-                      {req.status === 'PENDING' ? (
-                        <span className="status status-swap_pending">
-                          PENDING
-                        </span>
-                      ) : (
-                        <span className="status status-rejected">
-                          REJECTED
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {/* Show Dismiss button only for REJECTED */}
-                      {req.status === 'REJECTED' && (
-                        <button
-                          className="action-btn btn-dismiss"
-                          onClick={() => handleDismiss(req.swapRequestId)}
-                        >
-                          Dismiss
-                        </button>
-                      )}
-                    </td>
+  {/* Show different badge based on status */}
+  {req.status === 'PENDING' ? (
+    <span className="status status-swap_pending">PENDING</span>
+  ) : req.status === 'REJECTED' ? (
+    <span className="status status-rejected">REJECTED</span>
+  ) : (
+    <span className="status status-accepted">ACCEPTED</span>
+  )}
+</td>
+<td>
+  {/* Show Dismiss button for REJECTED or ACCEPTED */}
+  {(req.status === 'REJECTED' || req.status === 'ACCEPTED') && (
+    <button
+      className="action-btn btn-dismiss"
+      onClick={() => handleDismiss(req.swapRequestId)}
+    >
+      Dismiss
+    </button>
+  )}
+</td>
                   </tr>
                 ))}
               </tbody>

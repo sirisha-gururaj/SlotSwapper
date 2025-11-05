@@ -541,3 +541,7 @@ a:hover {
 .icon-btn:hover {
   background-color: #f0f0f0;
 }
+.status-accepted {
+  background-color: #d1fadf; /* Light Green */
+  color: #05603a; /* Dark Green */
+}
