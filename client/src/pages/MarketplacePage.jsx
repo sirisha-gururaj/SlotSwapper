@@ -111,8 +111,8 @@ function MarketplacePage() {
             )}
           </tbody>
         </table>
-</div>
       </div>
+    </div>
 
       {/* The Modal: It only renders if 'isModalOpen' is true */}
       {isModalOpen && (

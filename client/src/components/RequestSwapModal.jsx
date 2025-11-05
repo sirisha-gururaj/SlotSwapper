@@ -1,7 +1,7 @@
 // src/components/RequestSwapModal.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-
+import { useNavigate } from 'react-router-dom';
 // 'slotToRequest' is the slot the user wants (from the marketplace)
 // 'onClose' is a function to close the modal
 // 'onSubmit' is a function to handle the final swap request
@@ -10,6 +10,7 @@ function RequestSwapModal({ slotToRequest, onClose, onSubmit }) {
   const [selectedSlotId, setSelectedSlotId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // When the modal opens, fetch the user's OWN swappable slots
   useEffect(() => {
@@ -46,11 +47,22 @@ function RequestSwapModal({ slotToRequest, onClose, onSubmit }) {
     onSubmit(selectedSlotId, slotToRequest.id);
   };
 
+  const handleGoToDashboard = () => {
+    onClose(); // Close the modal first
+    navigate('/'); // Then go to the dashboard
+  };
   return (
     // The modal background overlay
     <div className="modal-overlay" onClick={onClose}>
       {/* The modal content, stops click from closing */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* --- 4. ADD CLOSE 'X' BUTTON --- */}
+        <button className="modal-close-btn" onClick={onClose}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        {/* --- END OF 'X' BUTTON --- */}
         <h2>Request a Swap</h2>
         <p>
           You are requesting <strong>{slotToRequest.title}</strong> from{' '}
@@ -87,9 +99,19 @@ function RequestSwapModal({ slotToRequest, onClose, onSubmit }) {
             </>
           ) : (
             !loading && (
-              <p>
-                You have no swappable slots to offer. Go to your Dashboard to make a slot swappable.
-              </p>
+              <div className="no-slots-message">
+                <p>
+                  You have no swappable slots to offer. Go to your Dashboard to make a
+                  slot swappable.
+                </p>
+                <button 
+                  type="button" 
+                  className="btn-primary" 
+                  onClick={handleGoToDashboard}
+                >
+                  Go to Dashboard
+                </button>
+              </div>
             )
           )}
         </form>

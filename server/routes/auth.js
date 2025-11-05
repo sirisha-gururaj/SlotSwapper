@@ -75,32 +75,44 @@ router.post('/login', async (req, res) => {
 router.post('/google-login', async (req, res) => {
   try {
     const { token } = req.body;
-    
-    // 3a. Verify the token from Google
+
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-    const { name, email } = payload;
 
-    // 3b. Check if user already exists
+    // --- THIS IS THE FIX ---
+    // If Google provides a name, use it.
+    // If not, grab the part of their email before the "@" symbol.
+    const email = payload.email;
+    const name = payload.name || email.split('@')[0];
+    // --- END FIX ---
+
     let userResult = await query("SELECT * FROM users WHERE email = $1", [email]);
     let user = userResult.rows[0];
 
-    // 3c. If user does NOT exist, create them
     if (!user) {
-      // Create a long, random password for Google users
+      // User doesn't exist, create them
       const randomPassword = Math.random().toString(36).slice(-16);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(randomPassword, salt);
-      
+
+      // We now insert the guaranteed 'name' (either from Google or the email)
       const newUserSql = "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email";
       const newUserResult = await query(newUserSql, [name, email, hashedPassword]);
       user = newUserResult.rows[0];
     }
 
-    // 3d. Create *our* JWT token and send it back
+    // --- THIS IS THE SECOND FIX ---
+    // What if the user *did* exist but their name was NULL?
+    // We'll update their name here just in case.
+    if (!user.name && name) {
+      await query("UPDATE users SET name = $1 WHERE id = $2", [name, user.id]);
+      user.name = name; // Update the name for the token
+    }
+    // --- END FIX ---
+
     const tokenPayload = { user: { id: user.id, email: user.email, name: user.name } };
     const ourToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '1d' });
 
