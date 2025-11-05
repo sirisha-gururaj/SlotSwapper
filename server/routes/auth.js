@@ -1,7 +1,7 @@
 // Import the 'express' router
 const router = require('express').Router();
 // Import the database connection
-const db = require('../database.js');
+const { db } = require('../database.js');
 // Import 'bcrypt' for password hashing
 const bcrypt = require('bcrypt');
 // Import 'jsonwebtoken' for creating JWTs

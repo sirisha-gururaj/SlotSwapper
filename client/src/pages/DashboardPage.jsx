@@ -1,9 +1,9 @@
 // src/pages/DashboardPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import EventForm from '../components/EventForm';
 import EventList from '../components/EventList';
-import { useAuth } from '../context/AuthContext';
 import EditEventModal from '../components/EditEventModal';
 
 function DashboardPage() {
@@ -11,11 +11,13 @@ function DashboardPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // --- NEW STATE FOR ADD MODAL ---
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState(null);
 
-  // We wrap fetchEvents in useCallback
-  // This "memoizes" the function so it doesn't get recreated on every render
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -30,10 +32,10 @@ function DashboardPage() {
     }
   }, []);
 
-  // This useEffect runs once when the component mounts
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]); // The dependency array
+  }, [fetchEvents]); 
+
   const handleOpenEditModal = (event) => {
     setEventToEdit(event);
     setIsEditModalOpen(true);
@@ -42,6 +44,11 @@ function DashboardPage() {
   const handleCloseEditModal = () => {
     setEventToEdit(null);
     setIsEditModalOpen(false);
+  };
+  
+  // --- HELPER TO CLOSE ADD MODAL ---
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
   };
 
   if (loading) {
@@ -55,33 +62,48 @@ function DashboardPage() {
   return (
     <div className="page-container">
       <div className="dashboard-header">
-        <h2>Welcome, {user?.name}!</h2>
-        <p>Manage your events and make them available for swapping.</p>
-      </div>
-      <div className="dashboard-layout">
-        <div className="dashboard-column">
-          <EventForm onEventCreated={fetchEvents} />
+        <div>
+          <h2>Welcome, {user?.name}!</h2>
+          <p>Manage your events and make them available for swapping.</p>
         </div>
-        <div className="dashboard-column">
-          <EventList 
-            events={events} 
-            onEventUpdated={fetchEvents}
-            onEditClick={handleOpenEditModal} // <-- ADD THIS PROP
-          />
-        </div>
+        {/* --- THIS IS THE NEW ADD BUTTON --- */}
+        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
+          + Add Event
+        </button>
       </div>
-      {/* --- ADD THIS BLOCK --- */}
-    {isEditModalOpen && (
-      <EditEventModal
-        eventToEdit={eventToEdit}
-        onClose={handleCloseEditModal}
-        onEventUpdated={() => {
-          fetchEvents(); // Refetch events after update
-          handleCloseEditModal(); // Close the modal
-        }}
+
+      {/* --- EVENT LIST IS NOW FULL WIDTH --- */}
+      <EventList 
+        events={events} 
+        onEventUpdated={fetchEvents}
+        onEditClick={handleOpenEditModal} 
       />
-    )}
-    {/* --- END OF ADDED BLOCK --- */}
+      
+      {/* --- ADD MODAL (HIDDEN BY DEFAULT) --- */}
+      {isAddModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseAddModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <EventForm 
+              onEventCreated={() => {
+                fetchEvents();
+                handleCloseAddModal();
+              }} 
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* --- EDIT MODAL (No changes here) --- */}
+      {isEditModalOpen && (
+        <EditEventModal
+          eventToEdit={eventToEdit}
+          onClose={handleCloseEditModal}
+          onEventUpdated={() => {
+            fetchEvents();
+            handleCloseEditModal();
+          }}
+        />
+      )}
     </div>
   );
 }

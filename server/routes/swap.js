@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const db = require('../database.js');
+const { db } = require('../database.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
 
 // All routes in this file are protected
@@ -76,37 +76,41 @@ router.post('/request', async (req, res) => {
     // --- 2. All checks passed. Create the request and lock the slots. ---
     
     // We use db.serialize to run these commands in order, like a transaction
-    db.serialize(() => {
-      // 2a. Create the SwapRequest record
-      const sqlInsertRequest = `
-        INSERT INTO SwapRequests (requesterSlotId, receiverSlotId, status) 
-        VALUES (?, ?, 'PENDING')
-      `;
-      db.run(sqlInsertRequest, [mySlotId, theirSlotId], function (err) {
-        if (err) {
-          return res.status(500).json({ error: "Failed to create swap request." });
-        }
-        
-        const swapRequestId = this.lastID;
-
-        // 2b. Update both slots to 'SWAP_PENDING'
-        const sqlUpdateEvents = "UPDATE Events SET status = 'SWAP_PENDING' WHERE id = ? OR id = ?";
-        db.run(sqlUpdateEvents, [mySlotId, theirSlotId], function (err) {
-          if (err) {
-            // This is tricky, we'd ideally roll back. But for now, send error.
-            return res.status(500).json({ error: "Failed to lock slots." });
-          }
-          const sendNotification = req.app.get('sendNotification');
-          const receiverUserId = theirSlot.userId;
-          sendNotification(receiverUserId, { type: 'NEW_REQUEST' });
-          res.status(201).json({
-            message: "Swap request submitted successfully!",
-            swapRequestId: swapRequestId,
-            status: 'PENDING'
-          });
-        });
+    // Helper function to promisify db.run
+    const runDb = (sql, params) => new Promise((resolve, reject) => {
+      db.run(sql, params, function(err) {
+        if (err) reject(err);
+        resolve(this);
       });
     });
+
+    if (acceptance === false) {
+      // --- 2a. Handle REJECTION ---
+      
+      // We now 'await' each step so they happen in order
+      await runDb("UPDATE SwapRequests SET status = 'REJECTED' WHERE id = ?", [requestId]);
+      await runDb("UPDATE Events SET status = 'SWAPPABLE' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
+      
+      const sendNotification = req.app.get('sendNotification');
+      const requesterUserId = requesterSlot.userId;
+      sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'REJECTED' });
+      
+      res.status(200).json({ message: "Swap request rejected." });
+
+    } else {
+      // --- 2b. Handle ACCEPTANCE (The core logic) ---
+      
+      await runDb("UPDATE SwapRequests SET status = 'ACCEPTED' WHERE id = ?", [requestId]);
+      await runDb("UPDATE Events SET userId = ? WHERE id = ?", [requesterSlot.userId, receiverSlot.id]);
+      await runDb("UPDATE Events SET userId = ? WHERE id = ?", [receiverSlot.userId, requesterSlot.id]);
+      await runDb("UPDATE Events SET status = 'BUSY' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
+
+      const sendNotification = req.app.get('sendNotification');
+      const requesterUserId = requesterSlot.userId;
+      sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'ACCEPTED' });
+      
+      res.status(200).json({ message: "Swap accepted! Your calendars have been updated." });
+    }
 
   } catch (err) {
     res.status(500).json({ error: "Server error requesting swap." });
@@ -123,10 +127,26 @@ router.post('/response/:requestId', async (req, res) => {
     const { acceptance } = req.body; // true or false
     const responderId = req.user.id;
 
-    // --- 1. Validation Checks ---
+    // --- 1. PROMISIFIED DB HELPERS ---
+    // We define these helpers here to 'await' our database calls
+    const getDb = (sql, params) => new Promise((resolve, reject) => {
+      db.get(sql, params, (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+    
+    const runDb = (sql, params) => new Promise((resolve, reject) => {
+      db.run(sql, params, function(err) {
+        if (err) reject(err);
+        resolve(this);
+      });
+    });
+
+    // --- 2. Validation Checks (Now correctly awaited) ---
     
     // Find the swap request
-    const swapReq = await new Promise((r) => db.get("SELECT * FROM SwapRequests WHERE id = ?", [requestId], (_, row) => r(row)));
+    const swapReq = await getDb("SELECT * FROM SwapRequests WHERE id = ?", [requestId]);
     if (!swapReq) {
       return res.status(404).json({ error: "Swap request not found." });
     }
@@ -137,52 +157,54 @@ router.post('/response/:requestId', async (req, res) => {
     }
 
     // Find the slots involved
-    const receiverSlot = await new Promise((r) => db.get("SELECT * FROM Events WHERE id = ?", [swapReq.receiverSlotId], (_, row) => r(row)));
-    const requesterSlot = await new Promise((r) => db.get("SELECT * FROM Events WHERE id = ?", [swapReq.requesterSlotId], (_, row) => r(row)));
+    const receiverSlot = await getDb("SELECT * FROM Events WHERE id = ?", [swapReq.receiverSlotId]);
+    const requesterSlot = await getDb("SELECT * FROM Events WHERE id = ?", [swapReq.requesterSlotId]);
+    
+    // Check if slots were found (e.g., not deleted)
+    if (!receiverSlot || !requesterSlot) {
+      return res.status(404).json({ error: "One of the events in this swap no longer exists." });
+    }
 
     // Check if the current user is the correct person to respond
     if (receiverSlot.userId !== responderId) {
       return res.status(403).json({ error: "Forbidden. You are not the receiver of this swap request." });
     }
 
-    // --- 2. Process the response ---
+    // --- 3. Process the response (Now correctly awaited) ---
 
-    db.serialize(() => {
-      if (acceptance === false) {
-        // --- 2a. Handle REJECTION ---
-        db.run("UPDATE SwapRequests SET status = 'REJECTED' WHERE id = ?", [requestId]);
-        db.run("UPDATE Events SET status = 'SWAPPABLE' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
+    if (acceptance === false) {
+      // --- 3a. Handle REJECTION ---
+      
+      await runDb("UPDATE SwapRequests SET status = 'REJECTED' WHERE id = ?", [requestId]);
+      await runDb("UPDATE Events SET status = 'SWAPPABLE' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
+      
+      const sendNotification = req.app.get('sendNotification');
+      const requesterUserId = requesterSlot.userId;
+      sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'REJECTED' });
+      
+      res.status(200).json({ message: "Swap request rejected." });
 
-        // --- ADD THESE LINES ---
-        const sendNotification = req.app.get('sendNotification');
-        const requesterUserId = requesterSlot.userId;
-        sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'REJECTED' });
-        // --- END OF ADDED LINES ---
+    } else {
+      // --- 3b. Handle ACCEPTANCE (The core logic) ---
+      
+      await runDb("UPDATE SwapRequests SET status = 'ACCEPTED' WHERE id = ?", [requestId]);
+      await runDb("UPDATE Events SET userId = ? WHERE id = ?", [requesterSlot.userId, receiverSlot.id]);
+      await runDb("UPDATE Events SET userId = ? WHERE id = ?", [receiverSlot.userId, requesterSlot.id]);
+      await runDb("UPDATE Events SET status = 'BUSY' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
 
-        res.status(200).json({ message: "Swap request rejected." });
-
-      } else {
-        // --- 2b. Handle ACCEPTANCE (The core logic) ---
-        db.run("UPDATE SwapRequests SET status = 'ACCEPTED' WHERE id = ?", [requestId]);
-        db.run("UPDATE Events SET userId = ? WHERE id = ?", [requesterSlot.userId, receiverSlot.id]);
-        db.run("UPDATE Events SET userId = ? WHERE id = ?", [receiverSlot.userId, requesterSlot.id]);
-        db.run("UPDATE Events SET status = 'BUSY' WHERE id = ? OR id = ?", [receiverSlot.id, requesterSlot.id]);
-
-        // --- ADD THESE LINES ---
-        const sendNotification = req.app.get('sendNotification');
-        const requesterUserId = requesterSlot.userId;
-        sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'ACCEPTED' });
-        // --- END OF ADDED LINES ---
-
-        res.status(200).json({ message: "Swap accepted! Your calendars have been updated." });
-      }
-    });
+      const sendNotification = req.app.get('sendNotification');
+      const requesterUserId = requesterSlot.userId;
+      sendNotification(requesterUserId, { type: 'REQUEST_RESPONSE', status: 'ACCEPTED' });
+      
+      res.status(200).json({ message: "Swap accepted! Your calendars have been updated." });
+    }
 
   } catch (err) {
+    // This is what was happening before:
+    console.error("Error in swap response:", err);
     res.status(500).json({ error: "Server error responding to swap." });
   }
 });
-
 // ===========================================
 //  4. GET MY INCOMING SWAP REQUESTS
 //  Endpoint: GET /api/swap/requests/incoming

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const db = require('../database.js');
+const { db } = require('../database.js');
 // Import our "bouncer"
 const authMiddleware = require('../middleware/authMiddleware.js');
 

@@ -1,37 +1,35 @@
 // src/components/EventForm.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // 1. Import useRef
 import api from '../api';
 
-// We pass 'onEventCreated' as a prop
-// This lets us "lift state up" and tell the parent page to refetch
 function EventForm({ onEventCreated }) {
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [error, setError] = useState('');
 
+  // 2. Create refs
+  const startTimeRef = useRef(null);
+  const endTimeRef = useRef(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Basic validation
     if (!title || !startTime || !endTime) {
       setError('All fields are required.');
       return;
     }
+    
+    if (new Date(endTime) <= new Date(startTime)) {
+      setError('End time must be after the start time.');
+      return;
+    }
 
     try {
-      // Use the 'api' helper we made
       await api.post('/events', { title, startTime, endTime });
-
-      // Clear the form
-      setTitle('');
-      setStartTime('');
-      setEndTime('');
-
-      // Call the function from props to tell the Dashboard to refetch
       onEventCreated();
-
+      
     } catch (err) {
       setError('Failed to create event. Please try again.');
       console.error(err);
@@ -40,7 +38,7 @@ function EventForm({ onEventCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className="event-form">
-      <h3>Create New Event</h3>
+      <h2>Create New Event</h2>
       {error && <p className="error">{error}</p>}
       <div>
         <label>Title</label>
@@ -51,22 +49,45 @@ function EventForm({ onEventCreated }) {
         />
       </div>
       <div>
-        <label>Start Time</label>
+        {/* 3. Add onClick to the label */}
+        <label onClick={() => startTimeRef.current?.showPicker()}>
+          Start Time
+        </label>
         <input
-          type="datetime-local" // HTML5 input for date and time
+          type="datetime-local"
+          ref={startTimeRef} // 4. Add the ref
           value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
+          onChange={(e) => {
+            const newStartTime = e.target.value;
+            setStartTime(newStartTime);
+            if (!endTime || new Date(newStartTime) > new Date(endTime)) {
+              setEndTime(newStartTime);
+            }
+          }}
         />
       </div>
       <div>
-        <label>End Time</label>
+        {/* 5. Add onClick to the label */}
+        <label onClick={() => endTimeRef.current?.showPicker()}>
+          End Time
+        </label>
         <input
           type="datetime-local"
+          ref={endTimeRef} // 6. Add the ref
           value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
+          onChange={(e) => {
+            const newEndTime = e.target.value;
+            if (!startTime || new Date(newEndTime) >= new Date(startTime)) {
+              setEndTime(newEndTime);
+            } else {
+              setEndTime(startTime);
+            }
+          }}
+          min={startTime}
+          disabled={!startTime}
         />
       </div>
-      <button type="submit">Add Event</button>
+      <button type="submit" className="btn-primary">Add Event</button>
     </form>
   );
 }

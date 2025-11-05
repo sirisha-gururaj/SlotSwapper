@@ -1,30 +1,28 @@
 // src/components/EditEventModal.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // 1. Import useRef
 import api from '../api';
 
-// 'eventToEdit' is the event object we pass in
-// 'onClose' and 'onEventUpdated' are functions
 function EditEventModal({ eventToEdit, onClose, onEventUpdated }) {
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [error, setError] = useState('');
 
-  // When the component loads, pre-fill the form with the event's data
+  // 2. Create refs
+  const startTimeRef = useRef(null);
+  const endTimeRef = useRef(null);
+
   useEffect(() => {
     if (eventToEdit) {
       setTitle(eventToEdit.title);
-      // We need to format the ISO date string to "datetime-local" format
       setStartTime(formatDateForInput(eventToEdit.startTime));
       setEndTime(formatDateForInput(eventToEdit.endTime));
     }
   }, [eventToEdit]);
 
-  // Helper function to convert "2025-11-10T10:00:00Z" to "2025-11-10T10:00"
   const formatDateForInput = (isoDate) => {
     if (!isoDate) return '';
     const d = new Date(isoDate);
-    // Slices off the seconds and 'Z'
     return d.toISOString().slice(0, 16);
   };
 
@@ -36,18 +34,20 @@ function EditEventModal({ eventToEdit, onClose, onEventUpdated }) {
       setError('All fields are required.');
       return;
     }
+    
+    if (new Date(endTime) <= new Date(startTime)) {
+      setError('End time must be after the start time.');
+      return;
+    }
 
     try {
-      // Call the PUT endpoint we created
       await api.put(`/events/${eventToEdit.id}`, { 
         title, 
         startTime, 
         endTime 
       });
-
-      onEventUpdated(); // Tell the dashboard to refetch events
-      onClose(); // Close this modal
-
+      onEventUpdated();
+      onClose();
     } catch (err) {
       setError('Failed to update event. Please try again.');
       console.error(err);
@@ -58,7 +58,6 @@ function EditEventModal({ eventToEdit, onClose, onEventUpdated }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Edit Event</h2>
-        {/* This form is just like EventForm, but for editing */}
         <form onSubmit={handleSubmit} className="event-form">
           {error && <p className="error">{error}</p>}
           <div>
@@ -70,19 +69,42 @@ function EditEventModal({ eventToEdit, onClose, onEventUpdated }) {
             />
           </div>
           <div>
-            <label>Start Time</label>
+            {/* 3. Add onClick to the label */}
+            <label onClick={() => startTimeRef.current?.showPicker()}>
+              Start Time
+            </label>
             <input
               type="datetime-local"
+              ref={startTimeRef} // 4. Add the ref
               value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={(e) => {
+                const newStartTime = e.target.value;
+                setStartTime(newStartTime);
+                if (!endTime || new Date(newStartTime) > new Date(endTime)) {
+                  setEndTime(newStartTime);
+                }
+              }}
             />
           </div>
           <div>
-            <label>End Time</label>
+            {/* 5. Add onClick to the label */}
+            <label onClick={() => endTimeRef.current?.showPicker()}>
+              End Time
+            </label>
             <input
               type="datetime-local"
+              ref={endTimeRef} // 6. Add the ref
               value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
+              onChange={(e) => {
+                const newEndTime = e.target.value;
+                if (!startTime || new Date(newEndTime) >= new Date(startTime)) {
+                  setEndTime(newEndTime);
+                } else {
+                  setEndTime(startTime);
+                }
+              }}
+              min={startTime}
+              disabled={!startTime}
             />
           </div>
           <div className="modal-actions">
