@@ -68,6 +68,10 @@ const startServer = async () => {
   }
 };
 
-startServer(); // <-- 4. Call the function
+// Only start the server if this file is run directly (e.g., 'npm start')
+// and NOT when it is 'require'd (e.g., by a test file)
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = server;

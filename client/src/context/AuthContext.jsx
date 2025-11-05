@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
 
         // --- 2. ESTABLISH WEBSOCKET CONNECTION ---
         // Use 'ws:' (not wss:) for local development
-        ws.current = new WebSocket('ws://localhost:4000');
+        const renderURL = 'slotswapper-server.onrender.com'; // <-- PASTE YOUR URL (domain only)
+        ws.current = new WebSocket(`wss://${renderURL}`);
 
         // 2a. On Open: Authenticate
         ws.current.onopen = () => {

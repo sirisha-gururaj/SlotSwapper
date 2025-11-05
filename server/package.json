@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --testTimeout=10000 --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test DATABASE_URL=postgresql://slotswapper_db_user:vq5oT5G3R4UXnWbneRcbPSoUwGRlR5XZ@dpg-d45cimmmcj7s738tfvb0-a.oregon-postgres.render.com/slotswapper_db jest --testTimeout=10000 --detectOpenHandles",
     "start": "nodemon index.js",
     "start:prod": "node index.js"
   },
@@ -16,7 +16,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "sqlite3": "^5.1.7",
+    "pg": "^8.16.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {
