@@ -60,26 +60,28 @@ function DashboardPage() {
   }
 
   return (
-    <div className="page-container">
-      <div className="dashboard-header">
-        <div>
-          <h2>Welcome, {user?.name}!</h2>
-          <p>Manage your events and make them available for swapping.</p>
+    <>
+      <div className="page-container">
+        <div className="dashboard-header">
+          <div>
+            <h2>Welcome, {user?.name}!</h2>
+            <p>Manage your events and make them available for swapping.</p>
+          </div>
+          <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
+            + Add Event
+          </button>
         </div>
-        {/* --- THIS IS THE NEW ADD BUTTON --- */}
-        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
-          + Add Event
-        </button>
-      </div>
 
-      {/* --- EVENT LIST IS NOW FULL WIDTH --- */}
-      <EventList 
-        events={events} 
-        onEventUpdated={fetchEvents}
-        onEditClick={handleOpenEditModal} 
-      />
+        <EventList 
+          events={events} 
+          onEventUpdated={fetchEvents}
+          onEditClick={handleOpenEditModal} 
+        />
+      </div>
       
-      {/* --- ADD MODAL (HIDDEN BY DEFAULT) --- */}
+      {/* --- MODALS ARE MOVED OUTSIDE --- */}
+      {/* This makes them center on the *whole screen* */}
+      
       {isAddModalOpen && (
         <div className="modal-overlay" onClick={handleCloseAddModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -93,7 +95,6 @@ function DashboardPage() {
         </div>
       )}
       
-      {/* --- EDIT MODAL (No changes here) --- */}
       {isEditModalOpen && (
         <EditEventModal
           eventToEdit={eventToEdit}
@@ -104,7 +105,7 @@ function DashboardPage() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 

@@ -51,8 +51,8 @@ function EventList({ events, onEventUpdated, onEditClick}) {
   {events.map((event) => (
     <tr key={event.id}>
       <td>{event.title}</td>
-      <td>{new Date(event.startTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
-      <td>{new Date(event.endTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+      <td>{new Date(event.startTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
+      <td>{new Date(event.endTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
       <td>
         <span className={`status status-${event.status.toLowerCase()}`}>
           {event.status}

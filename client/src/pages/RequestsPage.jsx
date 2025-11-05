@@ -100,7 +100,7 @@ function RequestsPage() {
                   <tr key={req.swapRequestId}>
                     <td>{req.requesterName}</td>
                     <td>{req.requesterSlotTitle}</td>
-                    <td>{new Date(req.requesterSlotStartTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td>{new Date(req.requesterSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
                     <td>
                       <button 
                         className="action-btn btn-accept"
@@ -148,7 +148,7 @@ function RequestsPage() {
                   <tr key={req.swapRequestId}>
                     <td>{req.receiverName}</td>
                     <td>{req.receiverSlotTitle}</td>
-                    <td>{new Date(req.receiverSlotStartTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td>{new Date(req.receiverSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
                     <td>
   {/* Show different badge based on status */}
   {req.status === 'PENDING' ? (
