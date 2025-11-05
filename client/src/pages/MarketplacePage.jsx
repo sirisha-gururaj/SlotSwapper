@@ -96,8 +96,8 @@ function MarketplacePage() {
                 <tr key={slot.id}>
                   <td>{slot.ownerName}</td>
                   <td>{slot.title}</td>
-                  <td>{new Date(slot.startTime).toLocaleString()}</td>
-                  <td>{new Date(slot.endTime).toLocaleString()}</td>
+                  <td>{new Date(slot.startTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>{new Date(slot.endTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
                   <td>
                     <button
                       className="action-btn"
