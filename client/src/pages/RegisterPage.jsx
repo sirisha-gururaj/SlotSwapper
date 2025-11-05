@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import LiquidEther from '../components/LiquidEther';
 
-const PasswordChecklist = ({ password }) => {
+const PasswordChecklist = ({ password, submitted }) => {
   const checks = useMemo(() => {
     return {
       length: password.length >= 8,
@@ -15,15 +15,20 @@ const PasswordChecklist = ({ password }) => {
     };
   }, [password]);
 
-  const allValid = Object.values(checks).every(Boolean);
+  // Helper function to get the class for each item
+  const getClass = (isValid) => {
+    if (isValid) return 'valid';
+    if (submitted) return 'invalid'; // Only show 'invalid' if submit was tried
+    return ''; // Default (neutral)
+  };
 
   return (
     <ul className="password-checklist">
-      <li className={checks.length ? 'valid' : ''}>At least 8 characters</li>
-      <li className={checks.lowercase ? 'valid' : ''}>One lowercase letter (a-z)</li>
-      <li className={checks.uppercase ? 'valid' : ''}>One uppercase letter (A-Z)</li>
-      <li className={checks.number ? 'valid' : ''}>One number (0-9)</li>
-      <li className={checks.special ? 'valid' : ''}>One special character (!@#...)</li>
+      <li className={getClass(checks.length)}>At least 8 characters</li>
+      <li className={getClass(checks.lowercase)}>One lowercase letter (a-z)</li>
+      <li className={getClass(checks.uppercase)}>One uppercase letter (A-Z)</li>
+      <li className={getClass(checks.number)}>One number (0-9)</li>
+      <li className={getClass(checks.special)}>One special character (!@#...)</li>
     </ul>
   );
 };
@@ -32,8 +37,9 @@ function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // <-- ADD THIS
+  const [error, setError] = useState(''); // This is for server errors
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // <-- 2. ADD SUBMITTED STATE
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -50,10 +56,10 @@ function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitted(true);
     
     // --- 4. UPDATE THE VALIDATION CHECK ---
     if (!isPasswordValid) {
-      setError('Password does not meet all requirements.');
       return;
     }
     
@@ -121,6 +127,7 @@ function RegisterPage() {
             )}
           </span>
         </div>
+        <PasswordChecklist password={password} submitted={submitted} />
         </div>
         {/* --- END OF REPLACED BLOCK --- */}
         

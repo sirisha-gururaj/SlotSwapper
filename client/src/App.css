@@ -738,6 +738,7 @@ a:hover {
   }
 }
 /* === ADD STYLES FOR PASSWORD CHECKLIST === */
+/* === STYLES FOR PASSWORD CHECKLIST === */
 .password-checklist {
   list-style-type: none;
   padding: 0;
@@ -745,18 +746,29 @@ a:hover {
   font-size: 0.85rem;
 }
 
+/* Default (neutral) state */
 .password-checklist li {
-  color: #c82333; /* Default to red (invalid) */
+  color: #dddddd; /* Light gray text */
   margin-bottom: 4px;
 }
 
 .password-checklist li::before {
-  content: '✕ '; /* Red X */
+  content: '• '; /* Default bullet */
   margin-right: 8px;
 }
 
+/* Invalid state (only shows if 'submitted' is true) */
+.password-checklist li.invalid {
+  color: #f87171; /* Light red */
+}
+
+.password-checklist li.invalid::before {
+  content: '✕ '; /* Red X */
+}
+
+/* Valid state */
 .password-checklist li.valid {
-  color: #05603a; /* Green (valid) */
+  color: #34d399; /* Green */
 }
 
 .password-checklist li.valid::before {
