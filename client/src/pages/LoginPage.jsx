@@ -28,7 +28,7 @@ function LoginPage() {
     <div className="auth-page">
       {/* --- ADD THIS COMPONENT FOR THE BACKGROUND --- */}
     <div className="auth-background">
-      <LiquidEther />
+      <LiquidEther colors={[ '#5227FF', '#FF9FFC', '#B19EEF' ]} />
     </div>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Log In</h2>

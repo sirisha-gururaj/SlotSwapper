@@ -8,6 +8,7 @@
   /* MAKE SURE background-color IS GONE */
   position: relative; /* This is required */
   overflow: hidden; /* This is required */
+  background-color: #000000;
 }
 /* === ADD STYLES FOR LIQUID BACKGROUND === */
 .auth-background {
