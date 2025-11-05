@@ -14,11 +14,33 @@ const swapRoutes = require('./routes/swap.js');
 
 const app = express();
 // Define the single, allowed origin
+// --- NEW CORS CONFIG ---
+// Define the list of allowed frontend URLs
+const allowedOrigins = [
+  'https://slotswapper-rouge.vercel.app',
+  'http://localhost:5173'
+];
+
 const corsOptions = {
-  origin: 'https://slotswapper-rouge.vercel.app' // <-- Your Vercel URL
+  origin: (origin, callback) => {
+    // Check if the request's origin is in our allowed list
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      // !origin allows server-to-server requests or tools like Postman
+      callback(null, true);
+    } else {
+      callback(new Error('This origin is not allowed by CORS'));
+    }
+  },
+  methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS', // Explicitly allow all our methods
+  allowedHeaders: 'Content-Type,Authorization', // Explicitly allow required headers
 };
 
+// Enable preflight (OPTIONS) requests for all routes
+app.options('*', cors(corsOptions));
+
+// Use the CORS settings for all other requests
 app.use(cors(corsOptions));
+// --- END NEW CORS CONFIG ---
 app.use(express.json());
 
 // Use routes
