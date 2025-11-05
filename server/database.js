@@ -1,6 +1,8 @@
 // src/server/database.js
 const sqlite3 = require('sqlite3').verbose();
-const DB_SOURCE = process.env.NODE_ENV === 'test' ? "test.db.sqlite" : "db.sqlite";
+const DB_SOURCE = process.env.NODE_ENV === 'production' 
+  ? '/var/data/db.sqlite' 
+  : (process.env.NODE_ENV === 'test' ? 'test.db.sqlite' : 'db.sqlite');
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
   if (err) {
