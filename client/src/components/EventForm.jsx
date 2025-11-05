@@ -27,12 +27,19 @@ function EventForm({ onEventCreated }) {
     }
 
     try {
-      await api.post('/events', { title, startTime, endTime });
+      // Normalize to ISO timestamps so Postgres TIMESTAMPTZ accepts them reliably
+      const payload = {
+        title,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+      };
+      await api.post('/events', payload);
       onEventCreated();
-      
+
     } catch (err) {
-      setError('Failed to create event. Please try again.');
-      console.error(err);
+      // Show server-provided error when available to aid debugging
+      console.error('Create event error:', err);
+      setError(err.response?.data?.error || 'Failed to create event. Please try again.');
     }
   };
 
