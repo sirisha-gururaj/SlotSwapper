@@ -3,7 +3,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const app = require('./app');
-const { initDb } = require('./database.js'); // <-- 1. Import initDb
+const { initDb } = require('./database.js'); 
 
 const JWT_SECRET = "your-very-secret-key-12345";
 const PORT = 4000;
@@ -14,7 +14,6 @@ const wss = new WebSocketServer({ server });
 const clients = new Map();
 
 wss.on('connection', (ws) => {
-  // ... (all your existing wss.on code stays the same) ...
   console.log('WebSocket: Client connected');
   ws.on('message', (message) => {
     try {
@@ -42,7 +41,6 @@ wss.on('connection', (ws) => {
 });
 
 function sendNotification(userId, message) {
-  // ... (your existing sendNotification function) ...
   const ws = clients.get(userId);
   if (ws && ws.readyState === ws.OPEN) {
     console.log(`WebSocket: Sending message to User ${userId}:`, message);
@@ -54,10 +52,9 @@ function sendNotification(userId, message) {
 
 app.set('sendNotification', sendNotification);
 
-// --- 2. WRAP THE SERVER START IN AN ASYNC FUNCTION ---
 const startServer = async () => {
   try {
-    await initDb(); // <-- 3. Wait for the database to be ready
+    await initDb(); // Wait for the database to be ready
     
     server.listen(PORT, () => {
       console.log(`Server (HTTP and WebSocket) is running on http://localhost:${PORT}`);
@@ -68,8 +65,7 @@ const startServer = async () => {
   }
 };
 
-// Only start the server if this file is run directly (e.g., 'npm start')
-// and NOT when it is 'require'd (e.g., by a test file)
+// Only start the server if this file is run directly
 if (require.main === module) {
   startServer();
 }

@@ -52,7 +52,7 @@ const initDb = async () => {
     console.log("...Database setup finished.");
   } catch (err) {
     console.error("Database setup error:", err);
-    throw err;
+    throw err; // Re-throw the error to stop the process
   }
 };
 
