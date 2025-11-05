@@ -5,7 +5,6 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f0f2f5;
 }
 
 .auth-form {
@@ -15,6 +14,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
+  position: relative; /* Add this */
+  z-index: 2; /* Add this */
 }
 
 .auth-form h2 {
@@ -541,4 +542,23 @@ a:hover {
 .status-accepted {
   background-color: #d1fadf; /* Light Green */
   color: #05603a; /* Dark Green */
+}
+.password-wrapper {
+  position: relative;
+}
+
+/* This targets the input *inside* the wrapper */
+.password-wrapper input {
+  padding-right: 45px; /* Add space for the icon */
+}
+
+.eye-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #777;
+  user-select: none; /* Prevents selecting the emoji text */
 }

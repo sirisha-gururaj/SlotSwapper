@@ -1,0 +1,47 @@
+/* src/AnimatedBackground.css */
+
+/* This makes sure the animation isn't "on top" of our form */
+.auth-page {
+  position: relative;
+  overflow: hidden; /* Hides the edges of the blur */
+}
+
+/* This is the pseudo-element that creates the blurred, animated shape */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  width: 2000px;
+  height: 2000px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    -45deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00c8,
+    #ff0000
+  );
+  background-size: 400% 400%;
+  animation: AnimateBG 10s ease infinite;
+  filter: blur(100px); /* This is the "liquid" effect */
+  z-index: 1; /* Places the background behind the form */
+}
+
+/* The animation keyframes */
+@keyframes AnimateBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

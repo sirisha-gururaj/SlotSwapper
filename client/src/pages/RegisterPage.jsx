@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import '../AnimatedBackground.css';
 
 function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // <-- ADD THIS
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -49,15 +51,27 @@ function RegisterPage() {
             required
           />
         </div>
+
+        {/* --- THIS BLOCK IS REPLACED --- */}
         <div>
           <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="password-wrapper">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <span 
+              className="eye-icon" 
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </span>
+          </div>
         </div>
+        {/* --- END OF REPLACED BLOCK --- */}
+        
         <button type="submit">Sign Up</button>
         <p>
           Already have an account? <Link to="/login">Log In</Link>
