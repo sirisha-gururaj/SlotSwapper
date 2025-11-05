@@ -1,0 +1,34 @@
+# /docker-compose.yml
+
+# Use the modern version of Docker Compose
+version: '3.8'
+
+# Define our two "boxes" (services)
+services:
+
+  # This is our Node.js backend
+  server:
+    # Tells Docker where to find the "recipe"
+    build: ./server
+    # Maps your computer's port 4000 to the container's port 4000
+    ports:
+      - "4000:4000"
+    # This is for live-reloading and saving your database
+    volumes:
+      # Links your local 'server' code to the container's '/app'
+      - ./server:/app
+      # Tells Docker to use the 'node_modules' we built *inside* the container
+      - /app/node_modules
+
+  # This is our React frontend
+  client:
+    # Tells Docker where to find the "recipe"
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    # Tells Docker to wait until the 'server' is running before starting
+    depends_on:
+      - server
