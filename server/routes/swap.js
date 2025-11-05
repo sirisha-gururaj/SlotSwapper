@@ -9,7 +9,7 @@ router.get('/swappable-slots', async (req, res) => {
   try {
     const currentUserId = req.user.id;
     const sql = `
-      SELECT E.*, U.name as ownerName
+      SELECT E.*, COALESCE(U.name, SPLIT_PART(U.email, '@', 1)) as ownerName
       FROM events E
       JOIN users U ON E."userId" = U.id
       WHERE E.status = 'SWAPPABLE' AND E."userId" != $1
@@ -60,7 +60,8 @@ router.post('/request', async (req, res) => {
     
     const sendNotification = req.app.get('sendNotification');
     sendNotification(theirSlot.userId, { type: 'NEW_REQUEST' });
-
+    const broadcast = req.app.get('broadcast');
+    broadcast({ type: 'MARKETPLACE_UPDATE' }, requesterId); // Tell everyone else
     res.status(201).json({
       message: "Swap request submitted successfully!",
       swapRequestId: swapRequestId, status: 'PENDING'
@@ -95,6 +96,8 @@ router.post('/response/:requestId', async (req, res) => {
       const sendNotification = req.app.get('sendNotification');
       sendNotification(requesterSlot.userId, { type: 'REQUEST_RESPONSE', status: 'REJECTED' });
       res.status(200).json({ message: "Swap request rejected." });
+      const broadcast = req.app.get('broadcast');
+      broadcast({ type: 'MARKETPLACE_UPDATE' }, responderId);
     } else {
       await runDb("UPDATE swaprequests SET status = 'ACCEPTED' WHERE id = $1", [requestId]);
       await runDb('UPDATE events SET "userId" = $1 WHERE id = $2', [requesterSlot.userId, receiverSlot.id]);
@@ -103,6 +106,8 @@ router.post('/response/:requestId', async (req, res) => {
 
       const sendNotification = req.app.get('sendNotification');
       sendNotification(requesterSlot.userId, { type: 'REQUEST_RESPONSE', status: 'ACCEPTED' });
+      const broadcast = req.app.get('broadcast');
+      broadcast({ type: 'MARKETPLACE_UPDATE' }, responderId);
       res.status(200).json({ message: "Swap accepted! Your calendars have been updated." });
     }
   } catch (err) {
@@ -120,7 +125,7 @@ router.get('/requests/incoming', async (req, res) => {
         ReqSlot.id as requesterSlotId,
         ReqSlot.title as requesterSlotTitle,
         ReqSlot."startTime" as requesterSlotStartTime,
-        ReqUser.name as requesterName
+        COALESCE(ReqUser.name, SPLIT_PART(ReqUser.email, '@', 1)) as requesterName
       FROM swaprequests SR
       JOIN events RecSlot ON SR."receiverSlotId" = RecSlot.id
       JOIN events ReqSlot ON SR."requesterSlotId" = ReqSlot.id
@@ -145,7 +150,7 @@ router.get('/requests/outgoing', async (req, res) => {
         RecSlot.id as receiverSlotId,
         RecSlot.title as receiverSlotTitle,
         RecSlot."startTime" as receiverSlotStartTime,
-        RecUser.name as receiverName
+        COALESCE(RecUser.name, SPLIT_PART(RecUser.email, '@', 1)) as receiverName
       FROM swaprequests SR
       JOIN events ReqSlot ON SR."requesterSlotId" = ReqSlot.id
       JOIN events RecSlot ON SR."receiverSlotId" = RecSlot.id

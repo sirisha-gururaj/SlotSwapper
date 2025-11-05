@@ -49,9 +49,16 @@ function sendNotification(userId, message) {
     console.log(`WebSocket: No open connection for User ${userId}.`);
   }
 }
-
+function broadcast(message, excludedUserId) {
+  console.log(`WebSocket: Broadcasting message:`, message);
+  for (const [userId, client] of clients.entries()) {
+    if (userId !== excludedUserId && client.readyState === client.OPEN) {
+      client.send(JSON.stringify(message));
+    }
+  }
+}
 app.set('sendNotification', sendNotification);
-
+app.set('broadcast', broadcast);
 const startServer = async () => {
   try {
     await initDb(); // Wait for the database to be ready

@@ -33,6 +33,20 @@ function MarketplacePage() {
     fetchAvailableSlots();
   }, [fetchAvailableSlots]);
 
+  useEffect(() => {
+    const handleDataRefetch = () => {
+      console.log('Real-time: refetchData event received. Refetching marketplace.');
+      fetchAvailableSlots();
+    };
+    
+    window.addEventListener('refetchData', handleDataRefetch);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('refetchData', handleDataRefetch);
+    };
+  }, [fetchAvailableSlots]); // Add fetchAvailableSlots to the dependency array
+  // --- END OF NEW EFFECT ---
   // This is called when we click "Request Swap"
   const handleOpenModal = (slot) => {
     setSelectedSlot(slot);

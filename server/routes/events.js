@@ -59,6 +59,8 @@ router.patch('/:eventId/status', authMiddleware, async (req, res) => {
     }
 
     await query("UPDATE events SET status = $1 WHERE id = $2", [status, eventId]);
+    const broadcast = req.app.get('broadcast');
+    broadcast({ type: 'MARKETPLACE_UPDATE' }, userId);
     res.status(200).json({ message: "Event status updated successfully.", newStatus: status });
   } catch (err) {
     res.status(500).json({ error: "Server error updating event status." });

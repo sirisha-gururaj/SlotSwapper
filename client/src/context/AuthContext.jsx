@@ -50,17 +50,27 @@ export const AuthProvider = ({ children }) => {
 
         // 2b. On Message: Listen for notifications
         ws.current.onmessage = (event) => {
-              try {
-                const message = JSON.parse(event.data);
-                
-                if (message.type === 'NEW_REQUEST' || message.type === 'REQUEST_RESPONSE') {
-                  // 1. Update the badge
-                  fetchNotificationCount();
-                  
-                  // 2. Dispatch a global event that our pages can listen to
-                  window.dispatchEvent(new Event('refetchData'));
-                }
-              } catch (e) {
+          try {
+            const message = JSON.parse(event.data);
+            console.log('WebSocket: Message received:', message);
+
+            // --- THIS IS THE NEW LOGIC ---
+
+            // 1. Handle notification count updates
+            if (message.type === 'NEW_REQUEST' || message.type === 'REQUEST_RESPONSE') {
+              console.log('WebSocket: Notification received, refetching count.');
+              fetchNotificationCount();
+            }
+
+            // 2. Handle page data refreshes
+            // This now fires for all message types
+            if (message.type === 'NEW_REQUEST' || message.type === 'REQUEST_RESPONSE' || message.type === 'MARKETPLACE_UPDATE') {
+              console.log('WebSocket: Data refresh event, dispatching.');
+              window.dispatchEvent(new Event('refetchData'));
+            }
+            // --- END OF NEW LOGIC ---
+
+          } catch (e) {
             console.error('WebSocket: Error parsing message', e);
           }
         };
