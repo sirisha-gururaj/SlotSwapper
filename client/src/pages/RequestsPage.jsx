@@ -1,6 +1,7 @@
 // src/pages/RequestsPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api';
+import './RequestsPage.css';
 import { useAuth } from '../context/AuthContext'; // <-- 1. IMPORT useAuth
 
 function RequestsPage() {
@@ -54,13 +55,25 @@ function RequestsPage() {
   const handleResponse = async (requestId, acceptance) => {
     try {
       const action = acceptance ? 'accepted' : 'rejected';
-      await api.post(`/swap/response/${requestId}`, { acceptance });
+  // Ensure we always send a boolean (avoid accidental stringification)
+  // Log the outgoing payload for easier debugging in case the server errors
+  // (this is a minimal, safe instrumentation change)
+  // eslint-disable-next-line no-console
+  console.log('Sending swap response', { requestId, acceptance: !!acceptance });
+  const resp = await api.post(`/swap/response/${requestId}`, { acceptance: !!acceptance });
 
-      setMessage(`Request successfully ${action}.`);
-      fetchRequests(); // Refetch the lists
-      fetchNotificationCount(); // <-- 3. UPDATE NAVBAR BADGE
+  // eslint-disable-next-line no-console
+  console.log('Swap response success', resp?.data);
+  setMessage(`Request successfully ${action}.`);
+  // Await the subsequent refreshes so that any errors surface here and are handled
+  await fetchRequests(); // Refetch the lists
+  await fetchNotificationCount(); // <-- 3. UPDATE NAVBAR BADGE
     } catch (err) {
-      setError('Failed to respond to request.');
+      // Log the error for diagnostics and show server message when available
+      // (this does not change request logic, only improves error handling)
+      // eslint-disable-next-line no-console
+      console.error('Error responding to request:', err);
+      setError(err.response?.data?.error || 'Failed to respond to request.');
     }
   };
 
@@ -108,7 +121,9 @@ function RequestsPage() {
                   <tr key={req.swapRequestId}>
                     <td>{req.requesterName}</td>
                     <td>{req.requesterSlotTitle}</td>
-                    <td>{new Date(req.requesterSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
+                    <td>
+                      <span className="time-line">{new Date(req.requesterSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</span>
+                    </td>
                     <td>
                       <button 
                         className="action-btn btn-accept"
@@ -156,7 +171,9 @@ function RequestsPage() {
                   <tr key={req.swapRequestId}>
                     <td>{req.receiverName}</td>
                     <td>{req.receiverSlotTitle}</td>
-                    <td>{new Date(req.receiverSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</td>
+                    <td>
+                      <span className="time-line">{new Date(req.receiverSlotStartTime).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: true })}</span>
+                    </td>
                     <td>
   {/* Show different badge based on status */}
   {req.status === 'PENDING' ? (

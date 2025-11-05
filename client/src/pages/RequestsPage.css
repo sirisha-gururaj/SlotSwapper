@@ -1,0 +1,132 @@
+/* Styles for RequestsPage - modern, responsive two-column layout */
+.page-container.requests-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 18px 12px;
+}
+
+/* Stack on small screens */
+@media (max-width: 880px) {
+  .page-container.requests-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.requests-column {
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.requests-column h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+}
+.requests-column p {
+  margin: 0 0 14px 0;
+  color: #cfcfcf;
+}
+
+.table-wrapper {
+  background: transparent;
+  border-radius: 6px;
+  overflow: auto; /* allow horizontal scroll if table is wide */
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px; /* ensure table columns keep readable widths */
+  table-layout: fixed;
+}
+
+.table-wrapper thead th {
+  text-align: left;
+  padding: 12px 10px;
+  font-weight: 600;
+  color: #bdbdbd;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.92rem;
+}
+
+.table-wrapper tbody td {
+  padding: 14px 10px;
+  color: #e8e8e8;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  word-wrap: break-word;
+}
+
+/* Make username and slot columns more prominent */
+.table-wrapper tbody td:nth-child(1) {
+  width: 20%;
+  font-weight: 600;
+}
+.table-wrapper tbody td:nth-child(2) {
+  width: 35%;
+}
+.table-wrapper tbody td:nth-child(3) {
+  width: 25%;
+}
+.table-wrapper tbody td:nth-child(4),
+.table-wrapper tbody td:nth-child(5) {
+  width: 10%;
+}
+
+/* Ensure the time shows clearly on its own line */
+.time-line {
+  display: block;
+  color: #cfcfcf;
+  font-size: 0.92rem;
+  margin-top: 6px;
+}
+
+/* Buttons */
+.action-btn {
+  background: #0ea5e9;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: 8px;
+}
+.action-btn.btn-accept { background: #22c55e; }
+.action-btn.btn-reject { background: #ef4444; }
+.action-btn.btn-dismiss { background: #6b7280; }
+.action-btn:active { transform: translateY(1px); }
+
+/* Status badges */
+.status {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #0b0b0b;
+}
+.status-swap_pending { background: #fbbf24; }
+.status-rejected { background: #ef4444; color: #fff; }
+.status-accepted { background: #22c55e; color: #fff; }
+
+/* Empty state */
+.requests-list p {
+  color: #cfcfcf;
+  padding: 18px 8px;
+}
+
+/* Improve table row hover */
+.table-wrapper tbody tr:hover td {
+  background: rgba(255,255,255,0.01);
+}
+
+/* Make sure buttons wrap nicely on narrow screens */
+@media (max-width: 520px) {
+  .action-btn { padding: 6px 8px; margin-bottom: 6px; }
+  .table-wrapper table { min-width: 520px; }
+}
