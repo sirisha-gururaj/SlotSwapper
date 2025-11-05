@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import '../AnimatedBackground.css';
 import LiquidEther from '../components/LiquidEther';
 
 function LoginPage() {
