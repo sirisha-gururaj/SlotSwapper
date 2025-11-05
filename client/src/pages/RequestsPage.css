@@ -1,17 +1,11 @@
 /* Styles for RequestsPage - modern, responsive two-column layout */
 .page-container.requests-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Single column layout so incoming is fully visible and outgoing appears below it */
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: start;
   padding: 18px 12px;
-}
-
-/* Stack on small screens */
-@media (max-width: 880px) {
-  .page-container.requests-layout {
-    grid-template-columns: 1fr;
-  }
 }
 
 .requests-column {

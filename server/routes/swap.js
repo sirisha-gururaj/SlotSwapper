@@ -128,10 +128,10 @@ router.get('/requests/incoming', async (req, res) => {
     const currentUserId = req.user.id;
     const sql = `
       SELECT 
-        SR.id as swapRequestId,
-        ReqSlot.id as requesterSlotId,
-        ReqSlot.title as requesterSlotTitle,
-        ReqSlot."startTime" as requesterSlotStartTime,
+        SR.id as "swapRequestId",
+        ReqSlot.id as "requesterSlotId",
+        ReqSlot.title as "requesterSlotTitle",
+        ReqSlot."startTime" as "requesterSlotStartTime",
         /* --- THIS IS THE FIX --- */
         CASE 
           WHEN ReqUser.name IS NOT NULL AND ReqUser.name != '' THEN ReqUser.name 
@@ -157,11 +157,11 @@ router.get('/requests/outgoing', async (req, res) => {
     const currentUserId = req.user.id;
     const sql = `
       SELECT 
-        SR.id as swapRequestId,
+        SR.id as "swapRequestId",
         SR.status, 
-        RecSlot.id as receiverSlotId,
-        RecSlot.title as receiverSlotTitle,
-        RecSlot."startTime" as receiverSlotStartTime,
+        RecSlot.id as "receiverSlotId",
+        RecSlot.title as "receiverSlotTitle",
+        RecSlot."startTime" as "receiverSlotStartTime",
         /* --- THIS IS THE FIX --- */
         CASE 
           WHEN RecUser.name IS NOT NULL AND RecUser.name != '' THEN RecUser.name 
