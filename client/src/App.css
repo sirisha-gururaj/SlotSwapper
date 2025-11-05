@@ -20,20 +20,27 @@
   z-index: 1; /* Sits behind the form */
 }
 .auth-form {
-  background: #ffffff;
+  /* This is the frosted glass effect */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+
+  /* A subtle white border */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px; /* Make it a bit rounder */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  position: relative; /* Add this */
-  z-index: 2; /* Add this */
+  position: relative;
+  z-index: 2;
 }
 
 .auth-form h2 {
   text-align: center;
   margin-top: 0;
-  color: #333;
+  color: #ffffff;
 }
 
 .auth-form div {
@@ -44,7 +51,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #555;
+  color: #eeeeee;
 }
 
 .auth-form input {
@@ -75,7 +82,7 @@
 .auth-form p {
   text-align: center;
   margin-top: 1rem;
-  color: #555;
+  color: #dddddd;
 }
 
 .auth-form .error {
