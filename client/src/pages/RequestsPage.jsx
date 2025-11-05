@@ -94,7 +94,15 @@ function RequestsPage() {
           ) : (
             <div className="table-wrapper">
             <table>
-              {/* ... table head ... */}
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Requesting Slot</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
               <tbody>
                 {incoming.map((req) => (
                   <tr key={req.swapRequestId}>
@@ -136,7 +144,7 @@ function RequestsPage() {
             <table>
               <thead>
                 <tr>
-                  <th>User</th>
+                  <th>Username</th>
                   <th>Requesting Slot</th>
                   <th>Time</th>
                   <th>Status</th>

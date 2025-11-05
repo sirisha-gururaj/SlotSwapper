@@ -93,7 +93,7 @@ function MarketplacePage() {
         <table>
           <thead>
             <tr>
-              <th>Owner</th>
+              <th>Username</th>
               <th>Title</th>
               <th>Start Time</th>
               <th>End Time</th>
