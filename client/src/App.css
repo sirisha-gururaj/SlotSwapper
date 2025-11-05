@@ -737,3 +737,28 @@ a:hover {
     padding: 0 1rem; /* Add padding for mobile */
   }
 }
+/* === ADD STYLES FOR PASSWORD CHECKLIST === */
+.password-checklist {
+  list-style-type: none;
+  padding: 0;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+
+.password-checklist li {
+  color: #c82333; /* Default to red (invalid) */
+  margin-bottom: 4px;
+}
+
+.password-checklist li::before {
+  content: '✕ '; /* Red X */
+  margin-right: 8px;
+}
+
+.password-checklist li.valid {
+  color: #05603a; /* Green (valid) */
+}
+
+.password-checklist li.valid::before {
+  content: '✓ '; /* Green check */
+}

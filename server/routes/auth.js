@@ -18,6 +18,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: "Email already in use." });
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$/;
+if (!passwordRegex.test(password)) {
+  return res.status(400).json({ error: "Password does not meet all requirements." });
+}
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 

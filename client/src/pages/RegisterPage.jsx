@@ -1,8 +1,32 @@
 // src/pages/RegisterPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import LiquidEther from '../components/LiquidEther';
+
+const PasswordChecklist = ({ password }) => {
+  const checks = useMemo(() => {
+    return {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^a-zA-Z0-9]/.test(password),
+    };
+  }, [password]);
+
+  const allValid = Object.values(checks).every(Boolean);
+
+  return (
+    <ul className="password-checklist">
+      <li className={checks.length ? 'valid' : ''}>At least 8 characters</li>
+      <li className={checks.lowercase ? 'valid' : ''}>One lowercase letter (a-z)</li>
+      <li className={checks.uppercase ? 'valid' : ''}>One uppercase letter (A-Z)</li>
+      <li className={checks.number ? 'valid' : ''}>One number (0-9)</li>
+      <li className={checks.special ? 'valid' : ''}>One special character (!@#...)</li>
+    </ul>
+  );
+};
 
 function RegisterPage() {
   const [name, setName] = useState('');
@@ -13,16 +37,29 @@ function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const isPasswordValid = useMemo(() => {
+    return (
+      password.length >= 8 &&
+      /[a-z]/.test(password) &&
+      /[A-Z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^a-zA-Z0-9]/.test(password)
+    );
+  }, [password]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    
+    // --- 4. UPDATE THE VALIDATION CHECK ---
+    if (!isPasswordValid) {
+      setError('Password does not meet all requirements.');
       return;
     }
+    
     try {
       await register(name, email, password);
-      navigate('/login'); // Redirect to login page on success
+      navigate('/login');
     } catch (err) {
       setError('Failed to register. Email might be in use.');
     }
