@@ -13,7 +13,12 @@ const eventRoutes = require('./routes/events.js');
 const swapRoutes = require('./routes/swap.js');
 
 const app = express();
-app.use(cors());
+// Define the single, allowed origin
+const corsOptions = {
+  origin: 'https://slotswapper-rouge.vercel.app' // <-- Your Vercel URL
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Use routes
