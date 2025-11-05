@@ -778,4 +778,5 @@ a:hover {
 .event-form input[type="datetime-local"],
 .modal-content input[type="datetime-local"] {
   color-scheme: dark;
+  cursor: pointer;
 }

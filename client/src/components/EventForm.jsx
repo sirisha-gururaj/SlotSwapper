@@ -57,6 +57,7 @@ function EventForm({ onEventCreated }) {
           type="datetime-local"
           ref={startTimeRef} // 4. Add the ref
           value={startTime}
+          onClick={() => startTimeRef.current?.showPicker()}
           onChange={(e) => {
             const newStartTime = e.target.value;
             setStartTime(newStartTime);
@@ -75,6 +76,7 @@ function EventForm({ onEventCreated }) {
           type="datetime-local"
           ref={endTimeRef} // 6. Add the ref
           value={endTime}
+          onClick={() => endTimeRef.current?.showPicker()}
           onChange={(e) => {
             const newEndTime = e.target.value;
             if (!startTime || new Date(newEndTime) >= new Date(startTime)) {
