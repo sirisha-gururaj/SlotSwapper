@@ -13,9 +13,9 @@ router.get('/swappable-slots', async (req, res) => {
         E.*, 
         /* --- THIS IS THE FIX --- */
         CASE 
-          WHEN U.name IS NOT NULL AND U.name != '' THEN U.name 
-          ELSE SPLIT_PART(U.email, '@', 1) 
-        END as ownerName
+            WHEN U.name IS NOT NULL AND U.name != '' THEN U.name 
+            ELSE SPLIT_PART(U.email, '@', 1) 
+          END as "ownerName"
       /* --- END FIX --- */
       FROM events E
       JOIN users U ON E."userId" = U.id
@@ -136,7 +136,7 @@ router.get('/requests/incoming', async (req, res) => {
         CASE 
           WHEN ReqUser.name IS NOT NULL AND ReqUser.name != '' THEN ReqUser.name 
           ELSE SPLIT_PART(ReqUser.email, '@', 1) 
-        END as requesterName
+        END as "requesterName"
       /* --- END FIX --- */
       FROM swaprequests SR
       JOIN events RecSlot ON SR."receiverSlotId" = RecSlot.id
@@ -166,7 +166,7 @@ router.get('/requests/outgoing', async (req, res) => {
         CASE 
           WHEN RecUser.name IS NOT NULL AND RecUser.name != '' THEN RecUser.name 
           ELSE SPLIT_PART(RecUser.email, '@', 1) 
-        END as receiverName
+        END as "receiverName"
       /* --- END FIX --- */
       FROM swaprequests SR
       JOIN events ReqSlot ON SR."requesterSlotId" = ReqSlot.id
