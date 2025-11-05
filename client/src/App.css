@@ -780,3 +780,28 @@ a:hover {
   color-scheme: dark;
   cursor: pointer;
 }
+/* === ADD STYLES FOR GOOGLE LOGIN === */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #aaa;
+  margin: 1.5rem 0;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+.divider:not(:empty)::before {
+  margin-right: .25em;
+}
+.divider:not(:empty)::after {
+  margin-left: .25em;
+}
+
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+}

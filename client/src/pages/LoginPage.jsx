@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import LiquidEther from '../components/LiquidEther';
+import { GoogleLogin } from '@react-oauth/google';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   // 1. ADD EMAIL VALIDATION FUNCTION
@@ -50,6 +51,19 @@ function LoginPage() {
         setError('Failed to log in. Please check your credentials.');
       }
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await loginWithGoogle(credentialResponse.credential);
+      navigate('/'); // Redirect on success
+    } catch (err) {
+      setError('Google login failed. Please try again.');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google login was unsuccessful.');
   };
 
   return (
@@ -103,6 +117,17 @@ function LoginPage() {
         <p>
           Don't have an account? <Link to="/register">Sign Up</Link>
         </p>
+        <div className="divider">
+          <span>OR</span>
+        </div>
+        
+        <div className="google-btn-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap
+          />
+        </div>
       </form>
     </div>
   );

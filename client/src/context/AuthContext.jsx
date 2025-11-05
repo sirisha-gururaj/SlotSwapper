@@ -103,6 +103,19 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
   };
 
+  const loginWithGoogle = async (googleCredential) => {
+    // This calls our new backend endpoint
+    const response = await api.post('/auth/google-login', { 
+      token: googleCredential
+    });
+    
+    // The rest is the same as normal login
+    const { token, user } = response.data;
+    setToken(token);
+    setUser(user);
+    localStorage.setItem('token', token);
+  };
+
   const logout = () => {
     // --- 4. CLOSE WEBSOCKET ON LOGOUT ---
     if (ws.current) {
@@ -125,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     fetchNotificationCount,
     register,
     login,
+    loginWithGoogle,
     logout,
   };
 
