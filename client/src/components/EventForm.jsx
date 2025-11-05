@@ -59,12 +59,13 @@ function EventForm({ onEventCreated }) {
           value={startTime}
           onClick={() => startTimeRef.current?.showPicker()}
           onChange={(e) => {
-            const newStartTime = e.target.value;
-            setStartTime(newStartTime);
-            if (!endTime || new Date(newStartTime) > new Date(endTime)) {
-              setEndTime(newStartTime);
-            }
-          }}
+  setError(''); // <-- ADD THIS
+  const newStartTime = e.target.value;
+  setStartTime(newStartTime);
+  if (!endTime || new Date(newStartTime) > new Date(endTime)) {
+    setEndTime(newStartTime);
+  }
+}}
         />
       </div>
       <div>
@@ -78,13 +79,15 @@ function EventForm({ onEventCreated }) {
           value={endTime}
           onClick={() => endTimeRef.current?.showPicker()}
           onChange={(e) => {
-            const newEndTime = e.target.value;
-            if (!startTime || new Date(newEndTime) >= new Date(startTime)) {
-              setEndTime(newEndTime);
-            } else {
-              setEndTime(startTime);
-            }
-          }}
+  const newEndTime = e.target.value;
+  if (!startTime || new Date(newEndTime) >= new Date(startTime)) {
+    setEndTime(newEndTime);
+    setError(''); // <-- ADD THIS
+  } else {
+    // Don't set the time, just show the error
+    setError('End time must be after the start time.'); // <-- ADD THIS
+  }
+}}
           min={startTime}
           disabled={!startTime}
         />
