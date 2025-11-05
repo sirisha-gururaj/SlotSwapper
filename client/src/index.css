@@ -6,5 +6,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f4f4f4;
+  background-color: #000000;
+  color: #eeeeee; /* Set default text color to light gray */
 }

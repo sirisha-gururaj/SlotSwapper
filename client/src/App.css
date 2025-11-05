@@ -107,15 +107,20 @@ a:hover {
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: 60px;
+  
+  /* --- Glassmorphism --- */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-logo {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -126,7 +131,7 @@ a:hover {
 
 .nav-links a {
   text-decoration: none;
-  color: #555;
+  color: #dddddd;
   font-weight: 500;
 }
 
@@ -153,40 +158,48 @@ a:hover {
 }
 
 .page-container {
-  background: #ffffff;
+  /* --- Glassmorphism --- */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  color: #eeeeee; /* Set text color inside the card */
 }
 
 .event-form {
   padding: 0;
 }
 
-.event-form h3, .event-list h3 {
+.event-form h3, .event-list h3, .requests-column h3 {
   margin-top: 0;
-  color: #333;
+  color: #ffffff;
 }
 
 .event-form div {
   margin-bottom: 1rem;
 }
 
-.event-form label {
+.event-form label, .modal-content label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #555;
+  color: #eeeeee;
 }
 
-.event-form input {
+.event-form input, .modal-content select {
   width: 100%;
   padding: 0.75rem;
   box-sizing: border-box;
-  border: 1px solid #ddd;
   border-radius: 4px;
+  /* --- New Input Styles --- */
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
 }
-
 .event-form button {
   width: 100%;
   padding: 0.75rem;
@@ -204,17 +217,20 @@ a:hover {
   border-collapse: collapse;
 }
 
-.event-list th, .event-list td {
+.event-list th, .event-list td,
+.marketplace-list th, .marketplace-list td,
+.requests-list th, .requests-list td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   text-align: left;
 }
 
-.event-list th {
-  color: #777;
+.event-list th,
+.marketplace-list th,
+.requests-list th {
+  color: #bbbbbb;
   font-size: 0.9rem;
 }
-
 .status {
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
@@ -306,13 +322,19 @@ a:hover {
 }
 
 .modal-content {
-  background: #ffffff;
+  /* --- Glassmorphism --- */
+  background: rgba(30, 30, 30, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 500px;
   z-index: 1001;
+  color: #eeeeee; /* Set text color inside the modal */
 }
 
 .modal-content h2 {
@@ -378,7 +400,7 @@ a:hover {
 }
 
 .requests-column p {
-  color: #666;
+  color: #bbbbbb;
   font-size: 0.9rem;
 }
 
@@ -471,10 +493,11 @@ a:hover {
 }
 .dashboard-header h2 {
   margin: 0;
+  color: #ffffff;
 }
 .dashboard-header p {
   margin: 0.5rem 0 0;
-  color: #666;
+  color: #bbbbbb;
 }
 /* This targets the button we added */
 .dashboard-header .btn-primary {
@@ -582,4 +605,45 @@ a:hover {
 .eye-icon .icon-svg {
   width: 1.25rem;
   height: 1.25rem;
+}
+/* === ADD RESPONSIVE STYLES === */
+@media (max-width: 768px) {
+  
+  /* Makes tables scroll */
+  .table-wrapper {
+    overflow-x: auto;
+  }
+  
+  /* Stacks the navbar */
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .nav-links {
+    gap: 1rem;
+    padding-left: 0;
+    margin: 0;
+  }
+  
+  /* Stacks the dashboard header */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  /* Stacks the two-column layouts */
+  .requests-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Stacks the page content */
+  .app-content {
+    padding: 1rem;
+  }
+  .page-container {
+    padding: 1rem;
+  }
 }

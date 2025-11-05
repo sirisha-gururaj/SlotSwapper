@@ -75,6 +75,7 @@ function MarketplacePage() {
       {submitMessage && <div className="success-message">{submitMessage}</div>}
 
       <div className="marketplace-list">
+        <div className="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -110,6 +111,7 @@ function MarketplacePage() {
             )}
           </tbody>
         </table>
+</div>
       </div>
 
       {/* The Modal: It only renders if 'isModalOpen' is true */}

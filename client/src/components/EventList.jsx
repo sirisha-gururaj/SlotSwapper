@@ -35,6 +35,7 @@ function EventList({ events, onEventUpdated, onEditClick}) {
       {events.length === 0 ? (
         <p>You have no events. Create one to get started!</p>
       ) : (
+        <div className="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -112,6 +113,7 @@ function EventList({ events, onEventUpdated, onEditClick}) {
   ))}
 </tbody>
         </table>
+        </div>
       )}
     </div>
   );

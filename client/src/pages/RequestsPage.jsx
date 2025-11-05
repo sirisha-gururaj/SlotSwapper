@@ -92,6 +92,7 @@ function RequestsPage() {
           {incoming.length === 0 ? (
             <p>You have no pending incoming requests.</p>
           ) : (
+            <div className="table-wrapper">
             <table>
               {/* ... table head ... */}
               <tbody>
@@ -118,6 +119,7 @@ function RequestsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
@@ -130,6 +132,7 @@ function RequestsPage() {
           {outgoing.length === 0 ? (
             <p>You have no pending outgoing requests.</p>
           ) : (
+            <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
@@ -171,6 +174,7 @@ function RequestsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
